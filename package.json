@@ -1,0 +1,18 @@
+{
+  "name": "hms-web",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Strapi CMS + local HMS frontend rebuild.",
+  "scripts": {
+    "dev": "node scripts/start-dev.mjs",
+    "import:hms": "node scripts/import-hms-content.mjs",
+    "media:migrate": "node scripts/migrate-gauss-media-to-strapi.mjs",
+    "build:netlify": "node scripts/prepare-netlify.mjs",
+    "frontend": "node frontend/server.mjs",
+    "backend": "node backend/node_modules/@strapi/strapi/bin/strapi.js develop"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ivanorka/hms-web.git"
+  }
+}

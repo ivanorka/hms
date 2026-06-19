@@ -1,0 +1,9 @@
+*.avif binary
+*.doc binary
+*.docx binary
+*.jpg binary
+*.jpeg binary
+*.pdf binary
+*.png binary
+*.webp binary
+backend/public/uploads/** -diff

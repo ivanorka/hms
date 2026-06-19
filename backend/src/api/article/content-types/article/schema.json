@@ -1,0 +1,48 @@
+{
+  "kind": "collectionType",
+  "collectionName": "articles",
+  "info": {
+    "singularName": "article",
+    "pluralName": "articles",
+    "displayName": "Article",
+    "description": "HMS news and notices"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "attributes": {
+    "title": {
+      "type": "string",
+      "required": true
+    },
+    "slug": {
+      "type": "uid",
+      "targetField": "title",
+      "required": true
+    },
+    "category": {
+      "type": "enumeration",
+      "enum": ["Novosti", "Obavijesti"],
+      "default": "Novosti"
+    },
+    "excerpt": {
+      "type": "text"
+    },
+    "body": {
+      "type": "richtext"
+    },
+    "imageUrl": {
+      "type": "string"
+    },
+    "sourceUrl": {
+      "type": "string"
+    },
+    "publishedAtOriginal": {
+      "type": "datetime"
+    },
+    "order": {
+      "type": "integer",
+      "default": 0
+    }
+  }
+}

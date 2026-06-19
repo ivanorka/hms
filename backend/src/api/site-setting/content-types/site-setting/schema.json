@@ -1,0 +1,58 @@
+{
+  "kind": "singleType",
+  "collectionName": "site_settings",
+  "info": {
+    "singularName": "site-setting",
+    "pluralName": "site-settings",
+    "displayName": "Site Setting",
+    "description": "Global HMS site settings, navigation and footer"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "attributes": {
+    "siteName": {
+      "type": "string",
+      "required": true
+    },
+    "logoText": {
+      "type": "string"
+    },
+    "logoImageUrl": {
+      "type": "string"
+    },
+    "heroTitle": {
+      "type": "string"
+    },
+    "heroImageUrl": {
+      "type": "string"
+    },
+    "homePage": {
+      "type": "json"
+    },
+    "copyright": {
+      "type": "string"
+    },
+    "sourceBaseUrl": {
+      "type": "string"
+    },
+    "navigation": {
+      "type": "json"
+    },
+    "quickLinks": {
+      "type": "json"
+    },
+    "footerLinks": {
+      "type": "json"
+    },
+    "contact": {
+      "type": "json"
+    },
+    "sponsors": {
+      "type": "json"
+    },
+    "socialLinks": {
+      "type": "json"
+    }
+  }
+}

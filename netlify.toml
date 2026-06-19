@@ -1,0 +1,13 @@
+[build]
+  command = "node scripts/prepare-netlify.mjs"
+  publish = "frontend/public"
+
+[[headers]]
+  for = "/uploads/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
