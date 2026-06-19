@@ -749,6 +749,14 @@ img {
   margin: 0 0 18px;
 }
 
+.body h3 {
+  margin: 28px 0 12px;
+  color: var(--ink);
+  font-size: 22px;
+  line-height: 1.22;
+  font-weight: 800;
+}
+
 .body a {
   color: var(--red);
   font-weight: 700;
@@ -759,6 +767,20 @@ img {
 
 .body img {
   border-radius: 8px;
+}
+
+.registry-page .body {
+  max-width: 780px;
+  border-left: 4px solid var(--red);
+  padding-left: 22px;
+}
+
+.registry-page .body .imported-block {
+  margin: 0;
+}
+
+.registry-page .document-block {
+  margin-top: 36px;
 }
 
 .document-block {

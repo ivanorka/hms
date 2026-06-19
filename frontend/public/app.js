@@ -14,6 +14,7 @@ const routeSlug = () => stripSlash(window.location.pathname) || 'naslovna';
 const samePath = (href) => stripSlash(href || '/') === routeSlug();
 const html = (value = '') => value;
 const stripHtml = (value = '') => String(value).replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+const isUrl = (value = '') => /^https?:\/\//i.test(String(value).trim());
 const assetUrl = (value = '') => String(value || '').startsWith('/uploads/')
   ? (document.documentElement.dataset.cms === 'strapi' ? `${STRAPI_URL}${value}` : value)
   : value;
@@ -75,6 +76,11 @@ function seasonLabelFromHref(href = '') {
   return match ? `${match[1]}./${match[2]}.` : '';
 }
 
+function trainerSeasonLabel(page) {
+  const match = stripHtml(page.body || '').match(/sezona\s+(\d{4}\.\/\d{4}\.)/i);
+  return match?.[1] || '2025./2026.';
+}
+
 function isNoisyLinkTitle(title = '') {
   const value = String(title).trim();
   return !value || value === 'formattedPath' || value === 'name' || value === '_blank' || isUrl(value);
@@ -97,6 +103,15 @@ function titleFromHref(href = '') {
 function linkTitle(item, page) {
   const href = item.href || '';
   const season = seasonLabelFromHref(href);
+
+  if (page.slug === 'treneri') {
+    if (/docs\.google\.com\/spreadsheets/i.test(href) || /popis trenera/i.test(item.title || '')) {
+      return `Popis trenera registriranih pri HMS-u za sezonu ${trainerSeasonLabel(page)}`;
+    }
+    if (/cirsp\.hr/i.test(href)) {
+      return 'CIRSP edukacije za trenere';
+    }
+  }
 
   if (page.slug === 'reprezentativci') {
     return season ? `Reprezentativci HMS-a u sezoni ${season}` : 'Popis reprezentativaca HMS-a';
@@ -132,20 +147,91 @@ function normalizePageLinks(page) {
       ...item,
       href,
       title: linkTitle(item, page),
+      meta: linkMeta(item, page, href),
       season: seasonLabelFromHref(item.href)
     });
   }
   return [...byHref.values()];
 }
 
-function cleanImportedBody(body = '') {
-  return String(body)
-    .replace(/<h2>[a-z0-9-]+<\/h2>\s*/gi, '')
-    .replace(/<p>\s*(formattedPath|_blank|name)\s*<\/p>\s*/gi, '');
+function linkMeta(item, page, href) {
+  if (page.slug === 'treneri' && /docs\.google\.com\/spreadsheets/i.test(href)) return 'Registar';
+  if (page.slug === 'treneri' && /cirsp\.hr/i.test(href)) return 'Edukacija';
+  if (seasonLabelFromHref(item.href)) return seasonLabelFromHref(item.href);
+  if (isDocumentHref(href)) return 'Dokument';
+  if (/^https?:\/\//.test(href)) return 'Vanjski link';
+  return 'Stranica';
+}
+
+function cleanImportedBody(body = '', page = {}) {
+  const wrapper = document.createElement('div');
+  wrapper.innerHTML = String(body);
+
+  wrapper.querySelectorAll('h2').forEach((node) => {
+    const text = stripHtml(node.textContent);
+    if (/^[a-z0-9]+(?:-[a-z0-9]+)+$/.test(text) || ['assembly', 'clubs', 'representatives'].includes(text)) {
+      node.remove();
+    }
+  });
+
+  wrapper.querySelectorAll('p').forEach((node) => {
+    const text = stripHtml(node.textContent);
+    const pageTitle = stripHtml(page.title || '');
+    if (
+      /^(formattedPath|_blank|name)$/i.test(text) ||
+      (pageTitle && text.toLocaleLowerCase('hr-HR') === pageTitle.toLocaleLowerCase('hr-HR'))
+    ) {
+      node.remove();
+    }
+  });
+
+  if (page.slug === 'treneri') {
+    wrapper.querySelectorAll('.imported-block').forEach((node) => {
+      if (
+        !node.querySelector('.imported-block') &&
+        /docs\.google\.com\/spreadsheets/i.test(node.innerHTML) &&
+        /popis trenera registriranih/i.test(node.textContent)
+      ) {
+        node.remove();
+      }
+    });
+
+    wrapper.innerHTML = wrapper.innerHTML
+      .replace(/pri pri Hrvatskom/gi, 'pri Hrvatskom')
+      .replace(/o ćemu/gi, 'o čemu');
+  }
+
+  for (let pass = 0; pass < 3; pass += 1) {
+    wrapper.querySelectorAll('.imported-block, .imported-section').forEach((node) => {
+      if (!stripHtml(node.innerHTML) && !node.querySelector('a, img, figure')) {
+        node.remove();
+      }
+    });
+  }
+
+  wrapper.querySelectorAll('.imported-section').forEach((node) => {
+    node.replaceWith(...node.childNodes);
+  });
+
+  return wrapper.innerHTML.trim();
 }
 
 function shouldUseDocumentLayout(page) {
   return ['reprezentativci', 'plan-i-program'].includes(page.slug);
+}
+
+function shouldUseRegistryLayout(page) {
+  return ['treneri'].includes(page.slug);
+}
+
+function linkBlockHeading(page, documentLayout) {
+  if (documentLayout) {
+    return { kicker: 'Dokumenti', title: 'Dokumenti za preuzimanje' };
+  }
+  if (page.slug === 'treneri') {
+    return { kicker: 'Registar', title: 'Registri i edukacija' };
+  }
+  return { kicker: 'Linkovi', title: 'Povezani linkovi' };
 }
 
 function normalizeEntry(entry) {
@@ -409,20 +495,22 @@ function renderArticlePage(article) {
 function renderPage(page) {
   const pageLinks = normalizePageLinks(page);
   const documentLayout = shouldUseDocumentLayout(page);
+  const registryLayout = shouldUseRegistryLayout(page);
+  const linkHeading = linkBlockHeading(page, documentLayout);
   const links = pageLinks
     .map((item) => {
       const external = /^https?:\/\//.test(item.href) || isDocumentHref(item.href);
       return `
         <a href="${item.href}" ${external ? 'target="_blank" rel="noopener noreferrer"' : 'data-link'}>
           <span class="link-title">${item.title}</span>
-          <span class="link-meta">${item.season || (isDocumentHref(item.href) ? 'Dokument' : 'Stranica')}</span>
+          <span class="link-meta">${item.meta}</span>
         </a>`;
     })
     .join('');
-  const body = documentLayout ? '' : cleanImportedBody(page.body);
+  const body = documentLayout ? '' : cleanImportedBody(page.body, page);
 
   return `
-    <main class="section page-section ${documentLayout ? 'document-page' : ''}">
+    <main class="section page-section ${documentLayout ? 'document-page' : ''} ${registryLayout ? 'registry-page' : ''}">
       <div class="eyebrow">${page.section || 'HMS'}</div>
       <h1>${page.title}</h1>
       <p class="summary">${page.summary || ''}</p>
@@ -430,8 +518,8 @@ function renderPage(page) {
       ${links ? `
         <div class="document-block">
           <div class="document-head">
-            <p class="section-kicker">Dokumenti</p>
-            <h2>${documentLayout ? 'Dokumenti za preuzimanje' : 'Povezani linkovi'}</h2>
+            <p class="section-kicker">${linkHeading.kicker}</p>
+            <h2>${linkHeading.title}</h2>
           </div>
           <div class="link-list">${links}</div>
         </div>` : ''}
