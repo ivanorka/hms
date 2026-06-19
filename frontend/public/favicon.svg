@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="HMS">
+  <rect width="64" height="64" rx="14" fill="#ffffff"/>
+  <path d="M32 7l20 7v18c0 13.5-8.2 21.7-20 26-11.8-4.3-20-12.5-20-26V14l20-7z" fill="#231f20"/>
+  <path d="M32 11.2l16 5.6V32c0 10.4-6.1 17-16 20.9C22.1 49 16 42.4 16 32V16.8l16-5.6z" fill="#ffffff"/>
+  <path d="M20 18h8v8h-8zM36 18h8v8h-8zM28 26h8v8h-8zM20 34h8v8h-8zM36 34h8v8h-8z" fill="#ed1c24"/>
+  <path d="M31 10h2v43h-2z" fill="#231f20"/>
+  <path d="M25 7h14l-7 7z" fill="#231f20"/>
+  <path d="M17.5 49.2l28-37.2 2.2 1.6-28 37.2zM46.5 49.2l-28-37.2-2.2 1.6 28 37.2z" fill="#231f20"/>
+  <circle cx="32" cy="54" r="2.8" fill="#231f20"/>
+</svg>
